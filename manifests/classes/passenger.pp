@@ -11,9 +11,9 @@
 # == Parameters:
 #
 # $ensure:: *Default*: 'present'. Ensure the presence (or absence) of passenger
-# $version:: *Default*: '3.0.11'. Version of passenger 
-# $version_rake:: *Default*: '0.8.7'. Version of rake (dependency) 
-# $version_rack:: *Default*: '1.1.3'. Version of rack (dependency) 
+# $version:: *Default*: '3.0.11'. Version of passenger
+# $version_rake:: *Default*: '0.8.7'. Version of rake (dependency)
+# $version_rack:: *Default*: '1.1.3'. Version of rack (dependency)
 #
 # == Actions:
 #
@@ -45,11 +45,13 @@
 #
 # [Remember: No empty lines between comments and class definition]
 #
-class passenger( $ensure       = $passenger::params::ensure,
-                 $version      = $passenger::params::version_passenger,
-                 $version_rake = $passenger::params::version_rake,
-                 $version_rack = $passenger::params::version_rack
-               ) inherits passenger::params
+class passenger(
+    $ensure       = $passenger::params::ensure,
+    $version      = $passenger::params::version,
+    $version_rake = $passenger::params::version_rake,
+    $version_rack = $passenger::params::version_rack
+)
+inherits passenger::params
 {
     info ("Configuring passenger (with ensure = ${ensure})")
 
@@ -58,7 +60,7 @@ class passenger( $ensure       = $passenger::params::ensure,
     }
 
     # Ensure the class apache has been instanciated
-    if (! defined( Class['apache'] ) ) { 
+    if (! defined( Class['apache'] ) ) {
         fail("The class 'apache' is not instancied")
     }
 
@@ -81,64 +83,87 @@ class passenger::common {
     # Load the variables used in this module. Check the passenger-params.pp file
     require passenger::params
 
-    package { "${passenger::params::name_rake}":
-        ensure => $passenger::ensure ? { 
-                      'present' => "${passenger::version_rake}",
-                       default  => "${passenger_ensure}"
-                  },
+    # Install Rake (Ruby Make) from gems
+    $rake_ensure = $passenger::ensure ? {
+        'present' => "${passenger::version_rake}",
+        default   => "${passenger::ensure}"
+    }
+    package { 'ruby-rake':
+        name     => "${passenger::params::packagename_rake}",
+        ensure   => "${rake_ensure}",
         provider => gem,
     }
+
+    # Install Rack: a Ruby Webserver Interface via gems
+    $rack_ensure = $passenger::ensure ? {
+        'present' => "${passenger::version_rack}",
+        default   => "${passenger::ensure}"
+    }
+    package { 'ruby-rack':
+        name     => "${passenger::params::packagename_rack}",
+        ensure   => "${rack_ensure}",
+        provider => gem,
+    }
+
+    # Now install passenger
+    $real_passenger_ensure = $passenger::ensure ? {
+        'present' => "${passenger::version}",
+        default   => "${passenger::ensure}"
+    }
+    package { 'passenger':
+        name     => "${passenger::params::packagename}",
+        ensure   => "${real_passenger_ensure}",
+        provider => gem,
+    }
+
     
-    package { "${passenger::params::name_rack}":
-        ensure => $passenger::ensure ? { 
-                      'present' => "${passenger::version_rack}",
-                       default  => "${passenger_ensure}"
-                  },
-        provider => gem,
+    package { 'passenger_extra_packages':
+        name   => $passenger::params::extra_packages,
+        ensure => "${passenger::ensure}"
     }
 
-    package { "${passenger::params::name_passenger}":
-        ensure => $passenger::ensure ? { 
-                      'present' => "${passenger::version_passenger}",
-                       default  => "${passenger_ensure}"
-                  },
-        provider => gem,
-    }
-   
-    package { 'makedep':
-        name   => $passenger::params::makedep,
-        ensure => $passenger::ensure
-    }
+    # Ensure installation in the good order
+    Package['passenger_extra_packages'] -> Package['ruby-rake'] -> Package['ruby-rack'] -> Package['passenger']
 
-    Package['makedep'] -> Package["${passenger::params::name_rake}"] -> Package["${passenger::params::name_rack}"] -> Package["${passenger::params::name_passenger}"]
+    # Where Passenger is actually installed
+    $passenger_rootdir = $::operatingsystem ? {
+        default => "/var/lib/gems/1.8/gems/passenger-${passenger::version}"
+    }
 
     exec { 'passenger-install':
         command => "/usr/bin/yes \"\" | /var/lib/gems/1.8/bin/passenger-install-apache2-module > /tmp/debug_passenger 2>&1",
-        creates => "/var/lib/gems/1.8/gems/passenger-$version/ext/apache2/mod_passenger.so",
-        require => [ Package['passenger'], Package['makedep'] ];
+        creates => "${passenger_rootdir}/ext/apache2/mod_passenger.so",
+        require => [
+                    Package['passenger'],
+                    Package['passenger_extra_packages']
+                    ]
     }
 
-    file { 'passenger.load':
-        ensure  => $passenger::ensure,
-        path    => "${apache::params::mods_availabledir}/passenger.load",
-        content => "LoadModule passenger_module /var/lib/gems/1.8/gems/passenger-$version/ext/apache2/mod_passenger.so\n",
-        mode    => $passenger::params::configfile_mode,
-        owner   => $passenger::params::configfile_owner,
-        group   => $passenger::params::configfile_group,
+    # Now prepare the apache module files
+    include apache::params
+    file { "${apache::params::mods_availabledir}/passenger.load":
+        ensure  => "${passenger::ensure}",
+        content => "LoadModule passenger_module ${passenger_rootdir}/ext/apache2/mod_passenger.so\n",
+        mode    => "${passenger::params::configfile_mode}",
+        owner   => "${passenger::params::configfile_owner}",
+        group   => "${passenger::params::configfile_group}",
     }
 
-    file { 'passenger.conf':
-        ensure  => $passenger::ensure,
-        path    => "${apache::params::mods_availabledir}/passenger.conf",
+    file { "${apache::params::mods_availabledir}/passenger.conf": 
+        ensure  => "${passenger::ensure}",
         content => template("passenger/passenger.conf.erb"),
-        mode    => $passenger::params::configfile_mode,
-        owner   => $passenger::params::configfile_owner,
-        group   => $passenger::params::configfile_group,
+        mode    => "${passenger::params::configfile_mode}",
+        owner   => "${passenger::params::configfile_owner}",
+        group   => "${passenger::params::configfile_group}",
     }
 
     apache::module{"passenger":
-        ensure  => $passenger::ensure,
-        require => [ Exec['passenger-install'], File['passenger.load'], File['passenger.conf'] ]
+        ensure  => "${passenger::ensure}",
+        require => [
+                    Exec['passenger-install'],
+                    File["${apache::params::mods_availabledir}/passenger.load"],
+                    File["${apache::params::mods_availabledir}/passenger.conf"]
+                    ]
     }
 }
 
