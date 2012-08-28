@@ -38,40 +38,38 @@ class passenger::params {
     #### MODULE INTERNAL VARIABLES  #########
     # (Modify to adapt to unsupported OSes)
     #######################################
-    $name_passenger = $::operatingsystem ? {
-        default => 'passenger',
+    $packagename = $::operatingsystem ? {
+        default => 'passenger'
     }
-    $version_passenger = $::operatingsystem ? {
+    $version = $::operatingsystem ? {
         default => '3.0.11',
     }
 
-    $name_rake = $::operatingsystem ? {
+    # RAKE --  Ruby Make
+    # See http://rake.rubyforge.org/
+    $packagename_rake = $::operatingsystem ? {
         default => 'rake',
     }
     $version_rake = $::operatingsystem ? {
         default => '0.8.7',
     }
 
-    $name_rack = $::operatingsystem ? {
+    # Rack: a Ruby Webserver Interface
+    # See http://rack.github.com/
+    $packagename_rack = $::operatingsystem ? {
         default => 'rack',
     }
     $version_rack = $::operatingsystem ? {
         default => '1.1.3',
     }
 
-    $makedep = $::operatingsystem ? {
-        default => [ 'apache2-prefork-dev', 
-                     'build-essential', 
-                     'rubygems1.8', 
-                     'libcurl4-openssl-dev']
-    }
-
-    $module_config_file = $::operatingsystem ? {
-        default => '/etc/apache2/mods-available/passenger.conf',
-    }
-
-    $module_load_file = $::operatingsystem ? {
-        default => '/etc/apache2/mods-available/passenger.load',
+    $extra_packages = $::operatingsystem ? {
+        default => [
+                    'apache2-prefork-dev',
+                    'build-essential',
+                    'rubygems1.8',
+                    'libcurl4-openssl-dev'
+                    ]
     }
 
     $configfile_mode = $::operatingsystem ? {
@@ -84,6 +82,13 @@ class passenger::params {
 
     $configfile_group = $::operatingsystem ? {
         default => 'root',
+    }
+
+    # TODO: consider Ruby Enterprise Edition http://www.rubyenterpriseedition.com/
+
+    # Specify the Ruby interpreter to use.
+    $passenger_ruby = $::operatingsystem ? {
+        default => '/usr/bin/ruby1.8'
     }
 
 }
