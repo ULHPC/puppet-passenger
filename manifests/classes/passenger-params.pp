@@ -91,5 +91,8 @@ class passenger::params {
         default => '/usr/bin/ruby1.8'
     }
 
+    $default_user = $::operatingsystem ? {
+        default => 'nobody'
+    }
 }
 

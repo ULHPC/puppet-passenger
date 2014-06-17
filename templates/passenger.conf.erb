@@ -61,3 +61,5 @@ RackAutoDetect Off
 # document root is a Ruby on Rails application. 
 RailsAutoDetect On
 <% end %>
+
+PassengerDefaultUser <%= scope.lookupvar('passenger::default_user') %>

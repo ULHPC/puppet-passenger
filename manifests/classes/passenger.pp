@@ -50,7 +50,8 @@ class passenger(
     $version      = $passenger::params::version,
     $version_rake = $passenger::params::version_rake,
     $version_rack = $passenger::params::version_rack,
-    $passenger_ruby = $passenger::params::passenger_ruby
+    $passenger_ruby = $passenger::params::passenger_ruby,
+    $default_user = $passenger::params::default_user
 )
 inherits passenger::params
 {
