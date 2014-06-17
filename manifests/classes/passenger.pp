@@ -49,7 +49,8 @@ class passenger(
     $ensure       = $passenger::params::ensure,
     $version      = $passenger::params::version,
     $version_rake = $passenger::params::version_rake,
-    $version_rack = $passenger::params::version_rack
+    $version_rack = $passenger::params::version_rack,
+    $passenger_ruby = $passenger::params::passenger_ruby
 )
 inherits passenger::params
 {
@@ -125,28 +126,41 @@ class passenger::common {
     # Ensure installation in the good order
     Package['passenger_extra_packages'] -> Package['ruby-rake'] -> Package['ruby-rack'] -> Package['passenger']
 
-    # Where Passenger is actually installed
-    $passenger_rootdir = $::operatingsystem ? {
-        default => "/var/lib/gems/1.8/gems/passenger-${passenger::version}"
+
+    if $passenger::passenger_ruby == '/usr/bin/ruby1.9.1' or $passenger::passenger_ruby == '/usr/bin/ruby1.9.3' {
+      #Fix for debian7.4 and ruby version 1.9.x
+      $passenger_rootdir = "/var/lib/gems/1.9.1/gems/passenger-${passenger::version}"
+      $passenger_command = "/usr/bin/yes \"\" | passenger-install-apache2-module > /tmp/debug_passenger 2>&1"
+      $passenger_creates= "${passenger_rootdir}/buildout/apache2/mod_passenger.so"
+      $passenger_load_module = "LoadModule passenger_module ${passenger_rootdir}/buildout/apache2/mod_passenger.so\n"
+    } else {
+      # Where Passenger is actually installed
+      $passenger_rootdir = $::operatingsystem ? {
+          default => "/var/lib/gems/1.8/gems/passenger-${passenger::version}"
+      }
+      $passenger_command = "/usr/bin/yes \"\" | /var/lib/gems/1.8/bin/passenger-install-apache2-module > /tmp/debug_passenger 2>&1"
+      $passenger_creates= "${passenger_rootdir}/ext/apache2/mod_passenger.so"
+      $passenger_load_module = "LoadModule passenger_module ${passenger_rootdir}/ext/apache2/mod_passenger.so\n"
     }
 
     exec { 'passenger-install':
-        command => "/usr/bin/yes \"\" | /var/lib/gems/1.8/bin/passenger-install-apache2-module > /tmp/debug_passenger 2>&1",
-        creates => "${passenger_rootdir}/ext/apache2/mod_passenger.so",
-        require => [
-                    Package['passenger'],
-                    Package['passenger_extra_packages']
-                    ]
+      command => $passenger_command,
+      timeout => 0,
+      creates => $passenger_creates,
+      require => [
+                  Package['passenger'],
+                  Package['passenger_extra_packages']
+                  ]
     }
 
     # Now prepare the apache module files
     include apache::params
     file { "${apache::params::mods_availabledir}/passenger.load":
-        ensure  => "${passenger::ensure}",
-        content => "LoadModule passenger_module ${passenger_rootdir}/ext/apache2/mod_passenger.so\n",
-        mode    => "${passenger::params::configfile_mode}",
-        owner   => "${passenger::params::configfile_owner}",
-        group   => "${passenger::params::configfile_group}",
+      ensure  => "${passenger::ensure}",
+      content => $passenger_load_module,
+      mode    => "${passenger::params::configfile_mode}",
+      owner   => "${passenger::params::configfile_owner}",
+      group   => "${passenger::params::configfile_group}",
     }
 
     file { "${apache::params::mods_availabledir}/passenger.conf": 

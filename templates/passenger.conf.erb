@@ -20,7 +20,7 @@
 ################################################################################
 # See http://www.modrails.com/documentation/Users%20guide%20Apache.html#_configuring_phusion_passenger
 PassengerRoot <%= passenger_rootdir %>
-PassengerRuby <%= scope.lookupvar('passenger::params::passenger_ruby') %>
+PassengerRuby <%= scope.lookupvar('passenger::passenger_ruby') %>
 
 # Recoomended Passenger Configuration
 PassengerHighPerformance on
@@ -51,6 +51,7 @@ PassengerMaxRequests 4000
 #    throttling will take place, or in other words, that the above list of
 #    filesystem checks will be performed on every request. 
 PassengerStatThrottleRate 120
+<% if scope.lookupvar('passenger::passenger_ruby') != '/usr/bin/ruby1.9.1' and scope.lookupvar('passenger::passenger_ruby') != '/usr/bin/ruby1.9.3' %>
 
 # Whether Phusion Passenger should automatically detect whether a virtual host’s
 # document root is a Rack application 
@@ -59,5 +60,4 @@ RackAutoDetect Off
 # Whether Phusion Passenger should automatically detect whether a virtual host’s
 # document root is a Ruby on Rails application. 
 RailsAutoDetect On
-
-
+<% end %>
