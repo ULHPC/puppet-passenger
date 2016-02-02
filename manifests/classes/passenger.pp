@@ -128,7 +128,13 @@ class passenger::common {
     Package['passenger_extra_packages'] -> Package['ruby-rake'] -> Package['ruby-rack'] -> Package['passenger']
 
 
-    if $passenger::passenger_ruby == '/usr/bin/ruby1.9.1' or $passenger::passenger_ruby == '/usr/bin/ruby1.9.3' {
+    if $passenger::passenger_ruby == '/usr/bin/ruby2.1' {
+      #Fix for debian 8 and ruby version 2.1
+      $passenger_rootdir = "/var/lib/gems/2.1/gems/passenger-${passenger::version}"
+      $passenger_command = "/usr/bin/yes \"\" | /usr/local/bin/passenger-install-apache2-module > /tmp/debug_passenger 2>&1"
+      $passenger_creates= "${passenger_rootdir}/buildout/apache2/mod_passenger.so"
+      $passenger_load_module = "LoadModule passenger_module ${passenger_rootdir}/buildout/apache2/mod_passenger.so\n"
+    } elsif $passenger::passenger_ruby == '/usr/bin/ruby1.9.1' or $passenger::passenger_ruby == '/usr/bin/ruby1.9.3' {
       #Fix for debian7.4 and ruby version 1.9.x
       $passenger_rootdir = "/var/lib/gems/1.9.1/gems/passenger-${passenger::version}"
       $passenger_command = "/usr/bin/yes \"\" | passenger-install-apache2-module > /tmp/debug_passenger 2>&1"
@@ -164,7 +170,7 @@ class passenger::common {
       group   => "${passenger::params::configfile_group}",
     }
 
-    file { "${apache::params::mods_availabledir}/passenger.conf": 
+    file { "${apache::params::mods_availabledir}/passenger.conf":
         ensure  => "${passenger::ensure}",
         content => template("passenger/passenger.conf.erb"),
         mode    => "${passenger::params::configfile_mode}",

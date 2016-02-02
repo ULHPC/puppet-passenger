@@ -64,6 +64,22 @@ class passenger::params {
     }
 
     $extra_packages = $::operatingsystem ? {
+        /(?i-mx:debian|ubuntu)/ => $::lsbmajdistrelease ? {
+            default => [
+                        'apache2-prefork-dev',
+                        'build-essential',
+                        'rubygems',
+                        'libcurl4-openssl-dev',
+                        'zlib1g-dev',
+                        'ruby-dev'
+                       ],
+            6       => [
+                        'apache2-prefork-dev',
+                        'build-essential',
+                        'rubygems1.8',
+                        'libcurl4-openssl-dev'
+                       ]
+        },
         default => [
                     'apache2-prefork-dev',
                     'build-essential',
@@ -88,7 +104,11 @@ class passenger::params {
 
     # Specify the Ruby interpreter to use.
     $passenger_ruby = $::operatingsystem ? {
-        default => '/usr/bin/ruby1.8'
+        /(?i-mx:debian|ubuntu)/ => $::lsbmajdistrelease ? {
+            6       => '/usr/bin/ruby1.8',
+            default => '/usr/bin/ruby2.1'
+        },
+        default => '/usr/bin/ruby'
     }
 
     $default_user = $::operatingsystem ? {
