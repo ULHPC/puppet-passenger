@@ -32,15 +32,21 @@ class passenger::params {
     # ensure the presence (or absence) of passenger
     $ensure = $passenger_ensure ? {
         ''      => 'present',
-        default => "${passenger_ensure}"
+        default => $passenger_ensure
     }
 
     #### MODULE INTERNAL VARIABLES  #########
     # (Modify to adapt to unsupported OSes)
     #######################################
     $packagename = $::operatingsystem ? {
+        /(?i-mx:debian|ubuntu)/ => $::lsbmajdistrelease ? {
+            6       => 'passenger',
+            7       => 'passenger',
+            default => 'libapache2-mod-passenger'
+        },
         default => 'passenger'
     }
+
     $version = $::operatingsystem ? {
         default => '3.0.11',
     }
@@ -72,13 +78,13 @@ class passenger::params {
                         'libcurl4-openssl-dev',
                         'zlib1g-dev',
                         'ruby-dev'
-                       ],
+                      ],
             6       => [
                         'apache2-prefork-dev',
                         'build-essential',
                         'rubygems1.8',
                         'libcurl4-openssl-dev'
-                       ]
+                      ]
         },
         default => [
                     'apache2-prefork-dev',
