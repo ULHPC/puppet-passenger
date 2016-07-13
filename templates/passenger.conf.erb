@@ -21,7 +21,7 @@
 # See http://www.modrails.com/documentation/Users%20guide%20Apache.html#_configuring_phusion_passenger
 <IfModule mod_passenger.c>
 
-PassengerRoot <%= passenger_rootdir %>
+PassengerRoot <%= @passenger_rootdir %>
 PassengerRuby <%= scope.lookupvar('passenger::passenger_ruby') %>
 
 # Recommended Passenger Configuration

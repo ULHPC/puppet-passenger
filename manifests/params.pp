@@ -1,7 +1,7 @@
-# File::      <tt>passenger-params.pp</tt>
-# Author::    Hyacinthe Cartiaux (hyacinthe.cartiaux@uni.lu)
-# Copyright:: Copyright (c) 2011 Hyacinthe Cartiaux
-# License::   GPL v3
+# File::      <tt>params.pp</tt>
+# Author::    S. Varrette, H. Cartiaux, V. Plugaru, S. Diehl aka. UL HPC Management Team (hpc-sysadmins@uni.lu)
+# Copyright:: Copyright (c) 2016 S. Varrette, H. Cartiaux, V. Plugaru, S. Diehl aka. UL HPC Management Team
+# License::   Gpl-3.0
 #
 # ------------------------------------------------------------------------------
 # = Class: passenger::params
@@ -30,9 +30,9 @@ class passenger::params {
     ###########################################
 
     # ensure the presence (or absence) of passenger
-    $ensure = $passenger_ensure ? {
+    $ensure = $::passenger_ensure ? {
         ''      => 'present',
-        default => $passenger_ensure
+        default => $::passenger_ensure
     }
 
     #### MODULE INTERNAL VARIABLES  #########
@@ -112,6 +112,7 @@ class passenger::params {
     $passenger_ruby = $::operatingsystem ? {
         /(?i-mx:debian|ubuntu)/ => $::lsbmajdistrelease ? {
             6       => '/usr/bin/ruby1.8',
+            7       => '/usr/bin/ruby1.9.3',
             default => '/usr/bin/ruby2.1'
         },
         default => '/usr/bin/ruby'
