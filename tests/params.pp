@@ -15,7 +15,7 @@
 
 include 'passenger::params'
 
-$names = ["ensure", "protocol", "port", "packagename"]
+$names = ['ensure', 'protocol', 'port', 'packagename']
 
 notice("passenger::params::ensure = ${passenger::params::ensure}")
 notice("passenger::params::protocol = ${passenger::params::protocol}")
