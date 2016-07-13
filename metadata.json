@@ -15,6 +15,10 @@
     {
       "name": "puppetlabs-stdlib",
       "version_requirement": ">=4.2.2 <5.0.0"
+    },
+    {
+      "name": "ULHPC/apache",
+      "version_requirement": ">=0.2.4 <1.0.0"
     }
   ],
   "operatingsystem_support": [
@@ -22,9 +26,24 @@
       "operatingsystem": "Debian",
       "operatingsystemrelease": [
         "6",
-        "7"
+        "7",
+        "8"
       ]
     }
   ],
-  "tags": ["apache", "passenger", "rack", "rails"]
+  "tags": [
+    "apache",
+    "passenger",
+    "rack",
+    "rails"
+  ],
+  "classes": [
+    "passenger",
+    "passenger::common",
+    "passenger::common::debian",
+    "passenger::params"
+  ],
+  "definitions": [
+
+  ]
 }
