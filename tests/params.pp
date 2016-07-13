@@ -15,7 +15,7 @@
 
 include 'passenger::params'
 
-$names = ["ensure", "packagename", "version", "packagename_rake", "version_rake", "packagename_rack", "version_rack", "extra_packages", "configfile_mode", "configfile_owner", "configfile_group", "passenger_ruby", "default_user"]
+$names = ['ensure', 'packagename', 'version', 'packagename_rake', 'version_rake', 'packagename_rack', 'version_rack', 'extra_packages', 'configfile_mode', 'configfile_owner', 'configfile_group', 'passenger_ruby', 'default_user']
 
 notice("passenger::params::ensure = ${passenger::params::ensure}")
 notice("passenger::params::packagename = ${passenger::params::packagename}")
