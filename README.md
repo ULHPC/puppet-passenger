@@ -21,6 +21,10 @@ Configure and manage passenger.
 This module implements the following elements: 
 
 * __Puppet classes__:
+    - `passenger` 
+    - `passenger::common` 
+    - `passenger::common::debian` 
+    - `passenger::params` 
 
 * __Puppet definitions__: 
 
@@ -35,6 +39,7 @@ See `docs/contributing.md` for more details on the steps you shall follow to hav
 See [`metadata.json`](metadata.json). In particular, this module depends on 
 
 * [puppetlabs/stdlib](https://forge.puppetlabs.com/puppetlabs/stdlib)
+* [ULHPC/apache](https://forge.puppetlabs.com/ULHPC/apache)
 
 ## Overview and Usage
 

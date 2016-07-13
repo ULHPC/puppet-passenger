@@ -1,0 +1,49 @@
+{
+  "name": "ULHPC/passenger",
+  "version": "0.1.2",
+  "author": "S. Varrette, H. Cartiaux, V. Plugaru, S. Diehl aka. UL HPC Management Team",
+  "mail": "hpc-sysadmins@uni.lu",
+  "summary": "Configure and manage passenger",
+  "description": "Configure and manage passenger",
+  "license": "GPL-3.0",
+  "source": "https://github.com/ULHPC/puppet-passenger",
+  "docs_project": "ulhpc-puppet-passenger",
+  "project_page": "https://github.com/ULHPC/puppet-passenger",
+  "issues_url": "https://github.com/ULHPC/puppet-passenger/issues",
+  "forge_url": "https://forge.puppetlabs.com/ULHPC/passenger",
+  "dependencies": [
+    {
+      "name": "puppetlabs-stdlib",
+      "version_requirement": ">=4.2.2 <5.0.0"
+    },
+    {
+      "name": "ULHPC/apache",
+      "version_requirement": ">=0.2.4 <1.0.0"
+    }
+  ],
+  "operatingsystem_support": [
+    {
+      "operatingsystem": "Debian",
+      "operatingsystemrelease": [
+        "6",
+        "7",
+        "8"
+      ]
+    }
+  ],
+  "tags": [
+    "apache",
+    "passenger",
+    "rack",
+    "rails"
+  ],
+  "classes": [
+    "passenger",
+    "passenger::common",
+    "passenger::common::debian",
+    "passenger::params"
+  ],
+  "definitions": [
+
+  ]
+}
